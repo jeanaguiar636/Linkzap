@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minha Vitrine de Afiliado</title>
-    <!-- Importando o cliente do Supabase via CDN -->
+    <!-- Importando a biblioteca do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f0f2f5; color: #333; text-align: center; }
@@ -17,7 +17,7 @@
 </head>
 <body>
 
-    <!-- Banner que será alterado pelo painel de admin -->
+    <!-- Banner atualizado dinamicamente pelo admin -->
     <div class="banner-container">
         <img id="bannerImage" src="https://via.placeholder.com/1200x400?text=Carregando+Banner..." alt="Banner Principal">
     </div>
@@ -26,7 +26,7 @@
         <h1>Bem-vindo à minha Página!</h1>
         <p>Confira os melhores produtos e ofertas exclusivas.</p>
 
-        <!-- Contador de usuários controlado pelo admin -->
+        <!-- Contador de usuários atualizado dinamicamente pelo admin -->
         <div class="counter-box">
             <h3>👥 Usuários Ativos / Conectados</h3>
             <p style="font-size: 24px; font-weight: bold; color: #25D366;" id="userCounter">Carregando...</p>
@@ -34,14 +34,13 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO SUPABASE (Substitua pelas suas chaves do painel do Supabase)
-        const SUPABASE_URL = 'SUA_URL_DO_SUPABASE';
-        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_DO_SUPABASE';
+        // Configurações do seu projeto no Supabase
+        const SUPABASE_URL = 'https://cbsmepluubphgyzvkphi.supabase.co';
+        const SUPABASE_ANON_KEY = 'Sb_publishable_emnMTLRXvWUFPNKDkIYmwQ_QtOi6TIb';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function carregarDadosSite() {
             try {
-                // Busca as configurações na tabela 'configuracoes'
                 let { data, error } = await _supabase
                     .from('configuracoes')
                     .select('*')
@@ -49,7 +48,6 @@
                     .single();
 
                 if (data) {
-                    // Atualiza a imagem do banner e o contador na tela
                     document.getElementById('bannerImage').src = data.banner_url;
                     document.getElementById('userCounter').innerText = data.contador_usuarios;
                 }
@@ -58,7 +56,6 @@
             }
         }
 
-        // Executa ao carregar a página
         carregarDadosSite();
     </script>
 </body>
