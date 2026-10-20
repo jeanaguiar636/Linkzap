@@ -3,63 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Vitrine de Afiliado</title>
-    <!-- Importando o cliente do Supabase via CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Gerador de Link do WhatsApp</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f0f2f5; color: #333; text-align: center; }
-        .banner-container { width: 100%; max-height: 400px; overflow: hidden; background: #ddd; }
-        .banner-container img { width: 100%; height: auto; object-fit: cover; max-height: 400px; }
-        .content { padding: 40px 20px; }
-        .counter-box { background: white; padding: 20px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        h1 { color: #128C7E; }
+        :root {
+            --primary-color: #25D366;
+            --primary-dark: #128C7E;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #cccccc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .result-container {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: none;
+        }
+
+        .result-box {
+            background-color: #f9f9f9;
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 6px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background-color: #34b7f1;
+        }
+
+        .btn-secondary:hover {
+            background-color: #128c7e;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Banner que será alterado pelo painel de admin -->
-    <div class="banner-container">
-        <img id="bannerImage" src="https://via.placeholder.com/1200x400?text=Carregando+Banner..." alt="Banner Principal">
-    </div>
+    <div class="container">
+        <h2>Gerador de Link do WhatsApp</h2>
+        
+        <div class="form-group">
+            <label for="phone">Número do WhatsApp (com DDD):</label>
+            <input type="text" id="phone" placeholder="Ex: 11999999999" oninput="maskPhone(this)">
+            <div class="hint">Digite apenas os números com o DDD da sua região.</div>
+        </div>
 
-    <div class="content">
-        <h1>Bem-vindo à minha Página!</h1>
-        <p>Confira os melhores produtos e ofertas exclusivas.</p>
+        <div class="form-group">
+            <label for="message">Mensagem Personalizada (Opcional):</label>
+            <textarea id="message" placeholder="Olá, gostaria de mais informações sobre os produtos..."></textarea>
+            <div class="hint">Essa mensagem já virá preenchida quando o cliente clicar no link.</div>
+        </div>
 
-        <!-- Contador de usuários controlado pelo admin -->
-        <div class="counter-box">
-            <h3>👥 Usuários Ativos / Conectados</h3>
-            <p style="font-size: 24px; font-weight: bold; color: #25D366;" id="userCounter">Carregando...</p>
+        <button onclick="generateLink()">Gerar Link</button>
+
+        <div class="result-container" id="resultContainer">
+            <label>Link Gerado:</label>
+            <div class="result-box" id="generatedLink"></div>
+            
+            <div class="btn-group">
+                <button onclick="copyLink()">Copiar Link</button>
+                <button class="btn-secondary" onclick="testLink()">Testar Link</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO SUPABASE (Substitua pelas suas chaves do painel do Supabase)
-        const SUPABASE_URL = 'SUA_URL_DO_SUPABASE';
-        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_DO_SUPABASE';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        async function carregarDadosSite() {
-            try {
-                // Busca as configurações na tabela 'configuracoes'
-                let { data, error } = await _supabase
-                    .from('configuracoes')
-                    .select('*')
-                    .eq('id', 1)
-                    .single();
-
-                if (data) {
-                    // Atualiza a imagem do banner e o contador na tela
-                    document.getElementById('bannerImage').src = data.banner_url;
-                    document.getElementById('userCounter').innerText = data.contador_usuarios;
-                }
-            } catch (err) {
-                console.error('Erro ao carregar dados:', err);
-            }
+        function maskPhone(input) {
+            // Remove tudo que não for número
+            let value = input.value.replace(/\D/g, '');
+            input.value = value;
         }
 
-        // Executa ao carregar a página
-        carregarDadosSite();
+        let finalUrl = "";
+
+        function generateLink() {
+            let phone = document.getElementById('phone').value.replace(/\D/g, '');
+            let message = document.getElementById('message').value;
+
+            if (!phone) {
+                alert('Por favor, informe o número de WhatsApp!');
+                document.getElementById('phone').focus();
+                return;
+            }
+
+            // Adiciona o código do país padrão (Brasil = 55) caso não tenha colocado
+            if (phone.length <= 11) {
+                phone = '55' + phone;
+            }
+
+            let encodedMessage = encodeURIComponent(message);
+            
+            // Monta a URL padrão da API do WhatsApp
+            finalUrl = `https://wa.me/${phone}`;
+            if (message.trim() !== "") {
+                finalUrl += `?text=${encodedMessage}`;
+            }
+
+            // Exibe o resultado
+            document.getElementById('generatedLink').innerText = finalUrl;
+            document.getElementById('resultContainer').style.display = 'block';
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(finalUrl).then(() => {
+                alert('Link copiado para a área de transferência!');
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+            });
+        }
+
+        function testLink() {
+            if (finalUrl) {
+                window.open(finalUrl, '_blank');
+            }
+        }
     </script>
+
 </body>
 </html>
