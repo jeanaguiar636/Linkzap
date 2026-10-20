@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Administrativo - Alterar Banner e Métricas</title>
+    <!-- Importando a biblioteca do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 40px; display: flex; justify-content: center; }
@@ -28,7 +29,7 @@
         </div>
 
         <div class="form-group">
-            <label for="counterInput">Contagem de Usuários (Fictícia ou Real):</label>
+            <label for="counterInput">Contagem de Usuários:</label>
             <input type="number" id="counterInput" placeholder="Ex: 1542">
         </div>
 
@@ -37,11 +38,11 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'SUA_URL_DO_SUPABASE';
-        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_DO_SUPABASE';
+        // Configurações do seu projeto no Supabase
+        const SUPABASE_URL = 'https://cbsmepluubphgyzvkphi.supabase.co';
+        const SUPABASE_ANON_KEY = 'Sb_publishable_emnMTLRXvWUFPNKDkIYmwQ_QtOi6TIb';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Carrega os valores atuais quando abre o painel
         async function carregarAdmin() {
             let { data } = await _supabase.from('configuracoes').select('*').eq('id', 1).single();
             if (data) {
