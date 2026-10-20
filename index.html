@@ -3,71 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Link WhatsApp - Linkzap</title>
+    <title>Minha Vitrine de Afiliado</title>
+    <!-- Importando o cliente do Supabase via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f0f2f5; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
-        h1 { color: #128C7E; font-size: 24px; margin-bottom: 10px; }
-        p { color: #666; font-size: 14px; margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; color: #444; }
-        input, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        textarea { resize: vertical; height: 90px; }
-        button { background: #25D366; color: white; border: none; padding: 14px; border-radius: 6px; width: 100%; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 10px; }
-        button:hover { background: #128C7E; }
-        .result-box { margin-top: 25px; background: #eef9f1; padding: 15px; border-radius: 8px; border: 1px solid #c8e6c9; display: none; text-align: left; }
-        .result-box input { background: white; margin-top: 5px; font-family: monospace; font-size: 12px; color: #333; }
-        .btn-copy { background: #128C7E; margin-top: 8px; padding: 8px; font-size: 14px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f0f2f5; color: #333; text-align: center; }
+        .banner-container { width: 100%; max-height: 400px; overflow: hidden; background: #ddd; }
+        .banner-container img { width: 100%; height: auto; object-fit: cover; max-height: 400px; }
+        .content { padding: 40px 20px; }
+        .counter-box { background: white; padding: 20px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 20px; }
+        h1 { color: #128C7E; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>Gerador de Link WhatsApp</h1>
-        <p>Crie seu link personalizado com mensagem pronta para o Linkzap</p>
+    <!-- Banner que será alterado pelo painel de admin -->
+    <div class="banner-container">
+        <img id="bannerImage" src="https://via.placeholder.com/1200x400?text=Carregando+Banner..." alt="Banner Principal">
+    </div>
 
-        <div class="form-group">
-            <label for="whatsappNumber">Número do WhatsApp (com DDD):</label>
-            <input type="text" id="whatsappNumber" placeholder="Ex: 5511999999999">
-        </div>
+    <div class="content">
+        <h1>Bem-vindo à minha Página!</h1>
+        <p>Confira os melhores produtos e ofertas exclusivas.</p>
 
-        <div class="form-group">
-            <label for="whatsappMessage">Mensagem Personalizada:</label>
-            <textarea id="whatsappMessage" placeholder="Olá! Gostaria de saber mais sobre os produtos."></textarea>
-        </div>
-
-        <button onclick="gerarLink()">Gerar Link</button>
-
-        <div class="result-box" id="resultBox">
-            <label style="color: #2e7d32;">Seu link gerado:</label>
-            <input type="text" id="generatedLink" readonly>
-            <button class="btn-copy" onclick="copiarLink()">Copiar Link</button>
+        <!-- Contador de usuários controlado pelo admin -->
+        <div class="counter-box">
+            <h3>👥 Usuários Ativos / Conectados</h3>
+            <p style="font-size: 24px; font-weight: bold; color: #25D366;" id="userCounter">Carregando...</p>
         </div>
     </div>
 
     <script>
-        function gerarLink() {
-            let numero = document.getElementById('whatsappNumber').value.replace(/\D/g, '');
-            let mensagem = document.getElementById('whatsappMessage').value;
+        // CONFIGURAÇÃO DO SUPABASE (Substitua pelas suas chaves do painel do Supabase)
+        const SUPABASE_URL = 'SUA_URL_DO_SUPABASE';
+        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_DO_SUPABASE';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            if (!numero) {
-                alert('Por favor, informe o número do WhatsApp!');
-                return;
+        async function carregarDadosSite() {
+            try {
+                // Busca as configurações na tabela 'configuracoes'
+                let { data, error } = await _supabase
+                    .from('configuracoes')
+                    .select('*')
+                    .eq('id', 1)
+                    .single();
+
+                if (data) {
+                    // Atualiza a imagem do banner e o contador na tela
+                    document.getElementById('bannerImage').src = data.banner_url;
+                    document.getElementById('userCounter').innerText = data.contador_usuarios;
+                }
+            } catch (err) {
+                console.error('Erro ao carregar dados:', err);
             }
-
-            let linkCodificado = `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(mensagem)}`;
-            
-            document.getElementById('generatedLink').value = linkCodificado;
-            document.getElementById('resultBox').style.display = 'block';
         }
 
-        function copiarLink() {
-            let campoLink = document.getElementById('generatedLink');
-            campoLink.select();
-            campoLink.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(campoLink.value);
-            alert('Link copiado com sucesso!');
-        }
+        // Executa ao carregar a página
+        carregarDadosSite();
     </script>
 </body>
 </html>
